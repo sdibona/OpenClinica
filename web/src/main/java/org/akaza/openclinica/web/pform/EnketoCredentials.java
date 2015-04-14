@@ -21,7 +21,7 @@ public class EnketoCredentials {
         EnketoCredentials credentials = new EnketoCredentials();
 
         String pManageUrl = CoreResources.getField("portalURL") + "/app/rest/oc/authorizations";
-        String ocUrl = CoreResources.getField("sysURL.base") + "rest2/openrosa/" + studyOid;
+        String ocUrl = CoreResources.getField("sysURL.base").replaceAll("/$", "");
         RestTemplate rest = new RestTemplate();
 
         try {
@@ -30,7 +30,7 @@ public class EnketoCredentials {
             if (response.length > 0) {
                 credentials.setServerUrl(response[0].getPformUrl());
                 credentials.setApiKey(response[0].getPformApiKey());
-                credentials.setOcInstanceUrl(ocUrl);
+                credentials.setOcInstanceUrl(ocUrl + "/rest2/openrosa/" + studyOid);
             } else {
                 logger.error("Unexpected response received from Participant Portal while retrieving PForm credentials.  Returning empty credentials.");
             }

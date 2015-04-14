@@ -22,7 +22,7 @@ public class ParticipantPortalRegistrar {
     public static final int PARTICIPATE_READ_TIMEOUT = 5000;
 
     public Authorization getAuthorization(String studyOid) {
-        String ocUrl = CoreResources.getField("sysURL.base") + "rest2/openrosa/" + studyOid;
+        String ocUrl = CoreResources.getField("sysURL.base").replaceAll("/$", "");
         String pManageUrl = CoreResources.getField("portalURL") + "/app/rest/oc/authorizations?studyoid=" + studyOid + "&instanceurl=" + ocUrl;
         CommonsClientHttpRequestFactory requestFactory = new CommonsClientHttpRequestFactory();
         requestFactory.setReadTimeout(PARTICIPATE_READ_TIMEOUT);
@@ -40,7 +40,7 @@ public class ParticipantPortalRegistrar {
     }
 
     public String getRegistrationStatus(String studyOid) {
-        String ocUrl = CoreResources.getField("sysURL.base") + "rest2/openrosa/" + studyOid;
+        String ocUrl = CoreResources.getField("sysURL.base").replaceAll("/$", "");
         String pManageUrl = CoreResources.getField("portalURL") + "/app/rest/oc/authorizations?studyoid=" + studyOid + "&instanceurl=" + ocUrl;
         CommonsClientHttpRequestFactory requestFactory = new CommonsClientHttpRequestFactory();
         requestFactory.setReadTimeout(PARTICIPATE_READ_TIMEOUT);
@@ -79,7 +79,7 @@ public class ParticipantPortalRegistrar {
     }
 
     public String registerStudy(String studyOid, String hostName) {
-        String ocUrl = CoreResources.getField("sysURL.base") + "rest2/openrosa/" + studyOid;
+        String ocUrl = CoreResources.getField("sysURL.base").replaceAll("/$", "");
         String pManageUrl = CoreResources.getField("portalURL") + "/app/rest/oc/authorizations?studyoid=" + studyOid + "&instanceurl=" + ocUrl;
         Authorization authRequest = new Authorization();
         Study authStudy = new Study();
@@ -105,7 +105,7 @@ public class ParticipantPortalRegistrar {
 
     public String getStudyHost(String studyOid) throws Exception {
 
-        String ocUrl = CoreResources.getField("sysURL.base") + "rest2/openrosa/" + studyOid;
+        String ocUrl = CoreResources.getField("sysURL.base").replaceAll("/$", "");
         String pManageUrl = CoreResources.getField("portalURL");
         String pManageUrlFull = pManageUrl + "/app/rest/oc/authorizations?studyoid=" + studyOid + "&instanceurl=" + ocUrl;
 
