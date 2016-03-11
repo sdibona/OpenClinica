@@ -1,9 +1,8 @@
-package org.akaza.openclinica.controller.openrosa.processor;
+package org.akaza.openclinica.service.pform.processor;
 
 import java.util.Date;
 import java.util.List;
 
-import org.akaza.openclinica.controller.openrosa.SubmissionContainer;
 import org.akaza.openclinica.dao.hibernate.CompletionStatusDao;
 import org.akaza.openclinica.dao.hibernate.CrfVersionDao;
 import org.akaza.openclinica.dao.hibernate.EventCrfDao;
@@ -22,6 +21,7 @@ import org.akaza.openclinica.domain.datamap.StudyEventDefinition;
 import org.akaza.openclinica.domain.datamap.StudySubject;
 import org.akaza.openclinica.domain.datamap.SubjectEventStatus;
 import org.akaza.openclinica.domain.user.UserAccount;
+import org.akaza.openclinica.service.pform.SubmissionContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +58,7 @@ public class EventProcessor implements Processor, Ordered {
     
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
+//    @Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
     public void process(SubmissionContainer container) throws Exception {
         logger.info("Executing Event Processor.");
         Errors errors = container.getErrors();
@@ -87,6 +88,7 @@ public class EventProcessor implements Processor, Ordered {
         return 3;
     }
     
+//    @Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
     private void processParticipant(SubmissionContainer container, Errors errors, StudySubject studySubject, StudyEventDefinition studyEventDefinition) throws Exception {
         Integer ordinal = Integer.valueOf(container.getSubjectContext().get("studyEventOrdinal"));
 

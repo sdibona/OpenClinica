@@ -1,4 +1,4 @@
-package org.akaza.openclinica.controller.openrosa.processor;
+package org.akaza.openclinica.service.pform.processor;
 
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
@@ -9,7 +9,6 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.akaza.openclinica.controller.openrosa.SubmissionContainer;
 import org.akaza.openclinica.dao.hibernate.StudyDao;
 import org.akaza.openclinica.dao.hibernate.StudySubjectDao;
 import org.akaza.openclinica.dao.hibernate.SubjectDao;
@@ -19,6 +18,7 @@ import org.akaza.openclinica.domain.datamap.Study;
 import org.akaza.openclinica.domain.datamap.StudySubject;
 import org.akaza.openclinica.domain.datamap.Subject;
 import org.akaza.openclinica.domain.user.UserAccount;
+import org.akaza.openclinica.service.pform.SubmissionContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +45,7 @@ public class StudySubjectProcessor implements Processor, Ordered {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
     
     @Override
+//    @Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
     public void process(SubmissionContainer container) throws Exception {
         logger.info("Executing study subject processor.");
         

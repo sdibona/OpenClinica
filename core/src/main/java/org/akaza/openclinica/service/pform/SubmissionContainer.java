@@ -1,4 +1,4 @@
-package org.akaza.openclinica.controller.openrosa;
+package org.akaza.openclinica.service.pform;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package org.akaza.openclinica.controller.openrosa;
+package org.akaza.openclinica.service.pform;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,9 @@ import org.akaza.openclinica.domain.datamap.CrfVersion;
 import org.akaza.openclinica.domain.datamap.Study;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.Errors;
 
 @Component
@@ -32,12 +34,13 @@ public class OpenRosaSubmissionService {
         runAsTransaction(study, requestPayload, subjectContext, errors, locale ,listOfUploadFilePaths);
     }
     
-    @Transactional
+    @Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
     private void runAsTransaction(Study study, String requestBody, HashMap<String, String> subjectContext, Errors errors, Locale locale,ArrayList <HashMap> listOfUploadFilePaths) throws Exception{
-
+        System.out.println("Starting Transaction");
+        System.out.println("Are we in a transaction? " + TransactionSynchronizationManager.isActualTransactionActive());
         SubmissionContainer container = new SubmissionContainer(study,requestBody,subjectContext,errors,locale ,listOfUploadFilePaths);
         submissionProcessorChain.processSubmission(container);
-
+        System.out.println("Transaction Completed.");
     }
 
     private String parseSubmission(String body, CrfVersion crfVersion) {

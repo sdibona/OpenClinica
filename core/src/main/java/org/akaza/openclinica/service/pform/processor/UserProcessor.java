@@ -1,10 +1,9 @@
-package org.akaza.openclinica.controller.openrosa.processor;
+package org.akaza.openclinica.service.pform.processor;
 
 import java.util.Date;
 
 import org.akaza.openclinica.bean.core.Role;
 import org.akaza.openclinica.bean.login.UserAccountBean;
-import org.akaza.openclinica.controller.openrosa.SubmissionContainer;
 import org.akaza.openclinica.dao.hibernate.StudyDao;
 import org.akaza.openclinica.dao.hibernate.StudyUserRoleDao;
 import org.akaza.openclinica.dao.hibernate.UserAccountDao;
@@ -15,6 +14,7 @@ import org.akaza.openclinica.domain.datamap.StudyUserRole;
 import org.akaza.openclinica.domain.datamap.StudyUserRoleId;
 import org.akaza.openclinica.domain.user.UserAccount;
 import org.akaza.openclinica.domain.user.UserType;
+import org.akaza.openclinica.service.pform.SubmissionContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +44,7 @@ public class UserProcessor implements Processor, Ordered {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     @Override
+//    @Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
     public void process(SubmissionContainer container) throws Exception{
         logger.info("Executing User Processor.");
         Errors errors = container.getErrors();

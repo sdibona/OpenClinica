@@ -8,10 +8,8 @@ import org.akaza.openclinica.patterns.ocobserver.StudyEventChangeDetails;
 import org.akaza.openclinica.patterns.ocobserver.StudyEventContainer;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional(propagation = Propagation.NEVER)
 public class StudyEventDao extends AbstractDomainDao<StudyEvent> implements ApplicationEventPublisherAware{
 
 	private ApplicationEventPublisher eventPublisher;
@@ -65,7 +63,7 @@ public class StudyEventDao extends AbstractDomainDao<StudyEvent> implements Appl
         return eventList;
       
 	}
-	
+	@Transactional
 	public StudyEvent saveOrUpdate(StudyEventContainer container) {
         StudyEvent event = saveOrUpdate(container.getEvent());
         this.eventPublisher.publishEvent(new OnStudyEventUpdated(container));

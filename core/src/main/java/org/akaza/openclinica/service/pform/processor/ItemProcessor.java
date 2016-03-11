@@ -1,4 +1,4 @@
-package org.akaza.openclinica.controller.openrosa.processor;
+package org.akaza.openclinica.service.pform.processor;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -14,9 +14,6 @@ import java.util.TreeSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.akaza.openclinica.controller.openrosa.ItemItemDataContainer;
-import org.akaza.openclinica.controller.openrosa.PformValidator;
-import org.akaza.openclinica.controller.openrosa.SubmissionContainer;
 import org.akaza.openclinica.dao.hibernate.CrfVersionDao;
 import org.akaza.openclinica.dao.hibernate.DiscrepancyNoteDao;
 import org.akaza.openclinica.dao.hibernate.DiscrepancyNoteTypeDao;
@@ -43,11 +40,15 @@ import org.akaza.openclinica.domain.datamap.Study;
 import org.akaza.openclinica.domain.datamap.StudySubject;
 import org.akaza.openclinica.domain.user.UserAccount;
 import org.akaza.openclinica.i18n.util.ResourceBundleProvider;
+import org.akaza.openclinica.service.pform.ItemItemDataContainer;
+import org.akaza.openclinica.service.pform.PformValidator;
+import org.akaza.openclinica.service.pform.SubmissionContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.Errors;
 import org.w3c.dom.Document;
@@ -95,6 +96,7 @@ public class ItemProcessor implements Processor, Ordered {
         return 4;
     }
 
+    //@Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
     public void process(SubmissionContainer container) throws Exception {
         logger.info("Executing Item Processor.");
         ArrayList<HashMap> listOfUploadFilePaths =container.getListOfUploadFilePaths();        
@@ -152,13 +154,14 @@ public class ItemProcessor implements Processor, Ordered {
                                         
                                         itemName = itemNode.getNodeName().trim();
                                         itemValue = itemNode.getTextContent();
+                                        System.out.println("Are we in a transaction (via ItemProcessor)? " + TransactionSynchronizationManager.isActualTransactionActive());
 
                                         Item item = lookupItem(itemName, crfVersion);
                                         
-                                        if (item == null) {
-                                            logger.error("Failed to lookup item: '" + itemName + "'.  Continuing with submission.");
-                                            continue;
-                                        }
+                                        //if (item == null) {
+                                        //    logger.error("Failed to lookup item: '" + itemName + "'.  Continuing with submission.");
+                                        //    continue;
+                                        //}
 
                                         ItemGroupMetadata itemGroupMeta = itemGroupMetadataDao.findByItemCrfVersion(item.getItemId(), crfVersion.getCrfVersionId());
                                         ItemFormMetadata itemFormMetadata = itemFormMetadataDao.findByItemCrfVersion(item.getItemId(), crfVersion.getCrfVersionId());

@@ -1,4 +1,4 @@
-package org.akaza.openclinica.controller.openrosa;
+package org.akaza.openclinica.service.pform;
 
 import org.akaza.openclinica.domain.datamap.Item;
 import org.akaza.openclinica.domain.datamap.ItemData;

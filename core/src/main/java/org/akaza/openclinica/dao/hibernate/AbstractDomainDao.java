@@ -7,6 +7,7 @@ import org.akaza.openclinica.domain.DomainObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -48,14 +49,14 @@ public abstract class AbstractDomainDao<T extends DomainObject> {
          return (T) q.uniqueResult();
     }
 
-    @Transactional
+    @Transactional(propagation=Propagation.REQUIRED)
     public T saveOrUpdate(T domainObject) {
         getSessionFactory().getStatistics().logSummary();
         getCurrentSession().saveOrUpdate(domainObject);
         return domainObject;
     }
 
-    @Transactional
+    @Transactional(propagation=Propagation.REQUIRED)
     public Serializable save(T domainObject) {
         getSessionFactory().getStatistics().logSummary();
         Serializable id = getCurrentSession().save(domainObject);
