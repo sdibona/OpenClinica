@@ -27,6 +27,7 @@ public class OpenRosaSubmissionService {
     @Autowired
     CrfVersionDao crfVersionDao;
     
+    @Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
     public void processRequest(Study study, HashMap<String,String> subjectContext, String requestBody, Errors errors, Locale locale, ArrayList <HashMap> listOfUploadFilePaths) throws Exception {
         // Execute save as Hibernate transaction to avoid partial imports
         CrfVersion crfVersion = crfVersionDao.findByOcOID(subjectContext.get("crfVersionOID"));
@@ -35,7 +36,7 @@ public class OpenRosaSubmissionService {
     }
     
     @Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
-    private void runAsTransaction(Study study, String requestBody, HashMap<String, String> subjectContext, Errors errors, Locale locale,ArrayList <HashMap> listOfUploadFilePaths) throws Exception{
+    public void runAsTransaction(Study study, String requestBody, HashMap<String, String> subjectContext, Errors errors, Locale locale,ArrayList <HashMap> listOfUploadFilePaths) throws Exception{
         System.out.println("Starting Transaction");
         System.out.println("Are we in a transaction? " + TransactionSynchronizationManager.isActualTransactionActive());
         SubmissionContainer container = new SubmissionContainer(study,requestBody,subjectContext,errors,locale ,listOfUploadFilePaths);
