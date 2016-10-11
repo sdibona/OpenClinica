@@ -43,6 +43,7 @@ public enum Page {
      * Page for reset password when password is expired.
      */
                 RESET_PASSWORD("/WEB-INF/jsp/login/resetPassword.jsp", "Reset your expired password"),
+                REPORT_MANAGER("/WEB-INF/jsp/reportManager.jsp", "Manage Reports"),
                 
     // YW >>
 

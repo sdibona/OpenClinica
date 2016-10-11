@@ -1,5 +1,6 @@
 package org.akaza.openclinica.dao.hibernate;
 
+import java.util.Date;
 import java.util.List;
 
 import org.akaza.openclinica.domain.datamap.EventCrf;
@@ -53,6 +54,19 @@ public class EventCrfDao extends AbstractDomainDao<EventCrf> {
         org.hibernate.Query q = getCurrentSession().createQuery(query);
         q.setInteger("studyeventid", studyEventId);
         q.setInteger("statusid", statusCode);
+        return q.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<EventCrf> findByStudyCrfDateStarted(int studyId, int crfId, Date startDate) {
+        String query = "from "
+                + getDomainClassName()
+                + " event_crf where event_crf.studyEvent.studyEventDefinition.study.studyId = :studyid and event_crf.crfVersion.crf.crfId = :crfid "
+                + " and event_crf.dateCreated > :startdate";
+        org.hibernate.Query q = getCurrentSession().createQuery(query);
+        q.setInteger("studyid", studyId);
+        q.setInteger("crfid", crfId);
+        q.setTimestamp("startdate", startDate);
         return q.list();
     }
     

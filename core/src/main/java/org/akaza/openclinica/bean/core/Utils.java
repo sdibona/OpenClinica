@@ -8,12 +8,6 @@
 
 package org.akaza.openclinica.bean.core;
 
-import org.akaza.openclinica.bean.managestudy.StudyBean;
-import org.akaza.openclinica.dao.core.CoreResources;
-import org.akaza.openclinica.domain.datamap.CrfBean;
-import org.akaza.openclinica.domain.datamap.CrfVersion;
-import org.akaza.openclinica.i18n.util.ResourceBundleProvider;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.ParseException;
@@ -26,6 +20,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.akaza.openclinica.bean.managestudy.StudyBean;
+import org.akaza.openclinica.dao.core.CoreResources;
+import org.akaza.openclinica.domain.datamap.CrfBean;
+import org.akaza.openclinica.domain.datamap.CrfVersion;
+import org.akaza.openclinica.i18n.util.ResourceBundleProvider;
 
 public class Utils {
 
@@ -245,6 +245,11 @@ public class Utils {
         if (rootPath == null || rootPath.length() <= 0) {
             rootPath = CoreResources.getField("filePath") + "attached_files" + File.separator;
         }
+        return rootPath;
+    }
+
+    public static String getReportsRootPath() {
+        String rootPath = CoreResources.getField("filePath") + "reports" + File.separator;
         return rootPath;
     }
 

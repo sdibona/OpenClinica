@@ -1337,16 +1337,24 @@
         <display-name>ParticipantFormServlet</display-name>
         <servlet-class>org.akaza.openclinica.control.submit.ParticipantFormServlet</servlet-class>
     </servlet>
-
-
     <servlet>
         <servlet-name>OpenRosaFormDownloadServlet</servlet-name>
         <display-name>OpenRosaFormDownloadServlet</display-name>
         <servlet-class>org.akaza.openclinica.web.openrosa.OpenRosaFormDownloadServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ReportManagerServlet</servlet-name>
+        <display-name>ReportManagerServlet</display-name>
+        <servlet-class>org.akaza.openclinica.control.ReportManagerServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>OpenRosaFormDownloadServlet</servlet-name>
         <url-pattern>/openrosa/formXml</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReportManagerServlet</servlet-name>
+        <url-pattern>/ReportManager</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
