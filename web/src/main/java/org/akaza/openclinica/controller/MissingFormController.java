@@ -129,7 +129,7 @@ public class MissingFormController {
         
         
         
-        List<CrfBean> crfs = crfDao.findAll();
+        List<CrfBean> crfs = crfDao.findAllOrderByName();
         for (CrfBean crf:crfs) {
             writer.write(crf.getName() + ",");
            

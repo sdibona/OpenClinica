@@ -1,5 +1,7 @@
 package org.akaza.openclinica.dao.hibernate;
 
+import java.util.ArrayList;
+
 import org.akaza.openclinica.bean.oid.CrfOidGenerator;
 import org.akaza.openclinica.bean.oid.OidGenerator;
 import org.akaza.openclinica.domain.datamap.CrfBean;
@@ -12,6 +14,12 @@ public class CrfDao extends AbstractDomainDao<CrfBean> {
         return CrfBean.class;
     }
 
+    public ArrayList<CrfBean> findAllOrderByName() {
+        getSessionFactory().getStatistics().logSummary();
+        String query = "from " + getDomainClassName() + " do order by do.name";
+        org.hibernate.Query q = getCurrentSession().createQuery(query);
+        return (ArrayList<CrfBean>) q.list();
+    }
     public CrfBean findByName(String crfName) {
         String query = "from " + getDomainClassName() + " crf  where crf.name = :crfName ";
         org.hibernate.Query q = getCurrentSession().createQuery(query);
