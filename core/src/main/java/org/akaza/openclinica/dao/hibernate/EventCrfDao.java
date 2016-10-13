@@ -61,7 +61,7 @@ public class EventCrfDao extends AbstractDomainDao<EventCrf> {
     public List<EventCrf> findByStudyCrfDateStarted(int studyId, int crfId, Date startDate) {
         String query = "from "
                 + getDomainClassName()
-                + " event_crf where event_crf.studyEvent.studyEventDefinition.study.studyId = :studyid and event_crf.crfVersion.crf.crfId = :crfid "
+                + " event_crf where (event_crf.studyEvent.studySubject.study.studyId = :studyid or event_crf.studyEvent.studySubject.study.study.studyId = :studyid) and event_crf.crfVersion.crf.crfId = :crfid "
                 + " and event_crf.dateCreated > :startdate";
         org.hibernate.Query q = getCurrentSession().createQuery(query);
         q.setInteger("studyid", studyId);
