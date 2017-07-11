@@ -126,12 +126,14 @@ public class ImportCRFDataService {
                 }
                 for (FormDataBean formDataBean : formDataBeans) {
 
+                    CRFDAO crfDAO = new CRFDAO(ds);
                     CRFVersionDAO crfVersionDAO = new CRFVersionDAO(ds);
 
                     ArrayList<CRFVersionBean> crfVersionBeans = crfVersionDAO.findAllByOid(formDataBean.getFormOID());
                     for (CRFVersionBean crfVersionBean : crfVersionBeans) {
 
-                        ArrayList<EventCRFBean> eventCrfBeans = eventCrfDAO.findByEventSubjectVersion(studyEventBean, studySubjectBean, crfVersionBean);
+                        CRFBean crfBean = crfDAO.findByVersionId(crfVersionBean.getId());
+                        List<EventCRFBean> eventCrfBeans = eventCrfDAO.findByEventSubjectCrf(studyEventBean, studySubjectBean, crfBean);
                         // what if we have begun with creating a study
                         // event, but haven't entered data yet? this would
                         // have us with a study event, but no corresponding
@@ -425,11 +427,20 @@ public class ImportCRFDataService {
                     logger.debug("iterating through form beans: found " + crfVersion.getOid());
                     // may be the point where we cut off item groups etc and
                     // instead work on sections
-                    EventCRFBean eventCRFBean = eventCRFDAO.findByEventCrfVersion(studyEvent, crfVersion);
+                    CRFDAO crfDAO = new CRFDAO(ds);
+                    CRFBean crfBean = crfDAO.findByVersionId(crfVersion.getId());
+                    List<EventCRFBean> eventCRFBeans = eventCRFDAO.findByStudyEventCrf(studyEvent, crfBean);
                     EventDefinitionCRFDAO eventDefinitionCRFDAO = new EventDefinitionCRFDAO(ds);
                     EventDefinitionCRFBean eventDefinitionCRF = eventDefinitionCRFDAO.findByStudyEventIdAndCRFVersionId(studyBean, studyEvent.getId(),
                             crfVersion.getId());
-                    if (eventCRFBean != null) {
+                    if (eventCRFBeans.size() > 1) {
+                        MessageFormat mf = new MessageFormat("");
+                        mf.applyPattern(respage.getString("duplicate_event_crfs_found"));
+                        Object[] arguments = { subjectDataBean.getSubjectOID(), studyEventDataBean.getStudyEventOID(), formDataBean.getFormOID() };
+
+                        throw new OpenClinicaException(mf.format(arguments), "");
+                    } else if (eventCRFBeans.size() == 1) {
+                        EventCRFBean eventCRFBean = eventCRFBeans.get(0);
                         if (permittedEventCRFIds.contains(new Integer(eventCRFBean.getId()))) {
                             
                             for (ImportItemGroupDataBean itemGroupDataBean : itemGroupDataBeans) {
@@ -571,10 +582,6 @@ public class ImportCRFDataService {
 
                         }// matches if on permittedCRFIDs
 
-                        CRFDAO crfDAO = new CRFDAO(ds);
-                        CRFBean crfBean = crfDAO.findByVersionId(crfVersion.getCrfId());
-                        // seems like an extravagance, but is not contained in crf
-                        // version or event crf bean
                         validationErrors = discValidator.validate();
                         // totalValidationErrors += validationErrors.size();
                         // totalValidationErrors.

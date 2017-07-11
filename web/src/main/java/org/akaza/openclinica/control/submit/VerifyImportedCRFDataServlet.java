@@ -15,29 +15,36 @@ import java.util.Locale;
 
 import javax.sql.DataSource;
 
+import org.akaza.openclinica.bean.admin.CRFBean;
 import org.akaza.openclinica.bean.core.DataEntryStage;
 import org.akaza.openclinica.bean.core.DiscrepancyNoteType;
-import org.akaza.openclinica.bean.core.ItemDataType;
 import org.akaza.openclinica.bean.core.ResolutionStatus;
 import org.akaza.openclinica.bean.core.Role;
-import org.akaza.openclinica.bean.core.Status;
-import org.akaza.openclinica.bean.core.Utils;
 import org.akaza.openclinica.bean.login.UserAccountBean;
 import org.akaza.openclinica.bean.managestudy.DiscrepancyNoteBean;
 import org.akaza.openclinica.bean.managestudy.StudyBean;
+import org.akaza.openclinica.bean.managestudy.StudyEventBean;
+import org.akaza.openclinica.bean.managestudy.StudyEventDefinitionBean;
 import org.akaza.openclinica.bean.managestudy.StudySubjectBean;
+import org.akaza.openclinica.bean.submit.CRFVersionBean;
 import org.akaza.openclinica.bean.submit.DisplayItemBean;
 import org.akaza.openclinica.bean.submit.DisplayItemBeanWrapper;
 import org.akaza.openclinica.bean.submit.EventCRFBean;
 import org.akaza.openclinica.bean.submit.ItemBean;
 import org.akaza.openclinica.bean.submit.ItemDataBean;
+import org.akaza.openclinica.bean.submit.crfdata.FormDataBean;
 import org.akaza.openclinica.bean.submit.crfdata.ODMContainer;
+import org.akaza.openclinica.bean.submit.crfdata.StudyEventDataBean;
 import org.akaza.openclinica.bean.submit.crfdata.SubjectDataBean;
 import org.akaza.openclinica.control.SpringServletAccess;
 import org.akaza.openclinica.control.core.SecureController;
 import org.akaza.openclinica.control.form.FormProcessor;
+import org.akaza.openclinica.dao.admin.CRFDAO;
 import org.akaza.openclinica.dao.managestudy.DiscrepancyNoteDAO;
+import org.akaza.openclinica.dao.managestudy.StudyEventDAO;
+import org.akaza.openclinica.dao.managestudy.StudyEventDefinitionDAO;
 import org.akaza.openclinica.dao.managestudy.StudySubjectDAO;
+import org.akaza.openclinica.dao.submit.CRFVersionDAO;
 import org.akaza.openclinica.dao.submit.EventCRFDAO;
 import org.akaza.openclinica.dao.submit.ItemDAO;
 import org.akaza.openclinica.dao.submit.ItemDataDAO;
@@ -155,6 +162,9 @@ public class VerifyImportedCRFDataServlet extends SecureController {
         }
 
         if ("save".equalsIgnoreCase(action)) {
+            
+            // perform CRF migrations, if applicable
+            migrateCrfVersions((ODMContainer)session.getAttribute("odmContainer"), currentStudy, ub);
 
             // setup ruleSets to run if applicable
             RuleSetServiceInterface ruleSetService = (RuleSetServiceInterface) SpringServletAccess.getApplicationContext(context).getBean("ruleSetService");
@@ -379,4 +389,62 @@ public class VerifyImportedCRFDataServlet extends SecureController {
             return mesg.toString();
         }
     }
+    
+    private void migrateCrfVersions(ODMContainer odmContainer, StudyBean study, UserAccountBean userBean) {
+        
+        //Migrate CRF Version if necessary
+        ArrayList<SubjectDataBean> subjectDataBeans = odmContainer.getCrfDataPostImportContainer().getSubjectData();
+        for (SubjectDataBean subjectDataBean : subjectDataBeans) {
+            StudySubjectDAO studySubjectDAO = new StudySubjectDAO(sm.getDataSource());
+            StudySubjectBean studySubjectBean = studySubjectDAO.findByOidAndStudy(subjectDataBean.getSubjectOID(), study.getId());
+
+            ArrayList<StudyEventDataBean> studyEventDataBeans = subjectDataBean.getStudyEventData();
+            for (StudyEventDataBean studyEventDataBean : studyEventDataBeans) {
+                int parentStudyId = study.getParentStudyId();
+                StudyEventDefinitionDAO sedDao = new StudyEventDefinitionDAO(sm.getDataSource());
+                StudyEventDefinitionBean sedBean = sedDao.findByOidAndStudy(studyEventDataBean.getStudyEventOID(), study.getId(), parentStudyId);
+
+                int ordinal = 1;
+                try {
+                    ordinal = new Integer(studyEventDataBean.getStudyEventRepeatKey()).intValue();
+                } catch (Exception e) {
+                    // trying to catch NPEs, because tags can be without the
+                    // repeat key
+                }
+                StudyEventDAO studyEventDAO = new StudyEventDAO(sm.getDataSource());
+                StudyEventBean studyEvent = (StudyEventBean) studyEventDAO.findByStudySubjectIdAndDefinitionIdAndOrdinal(studySubjectBean.getId(),
+                        sedBean.getId(), ordinal);
+
+                ArrayList<FormDataBean> formDataBeans = studyEventDataBean.getFormData();
+                for (FormDataBean formDataBean : formDataBeans) {
+                    //get crfversion from import file
+                    CRFVersionDAO crfVersionDAO = new CRFVersionDAO(sm.getDataSource());
+                    CRFVersionBean crfVersionBean = crfVersionDAO.findByOid(formDataBean.getFormOID());
+
+                    CRFDAO crfDAO = new CRFDAO(sm.getDataSource());
+                    CRFBean crf = (CRFBean) crfDAO.findByPK(crfVersionBean.getCrfId());
+
+                    //get event crf from db
+                    EventCRFDAO eventCRFDAO = new EventCRFDAO(sm.getDataSource());
+                    List<EventCRFBean> eventCrfs = eventCRFDAO.findByStudyEventCrf(studyEvent, crf);
+                    
+                    EventCRFBean eventCrf = eventCrfs.get(0);
+                    //if event crf doesn't match, update it
+                    if (eventCrf.getCRFVersionId() != crfVersionBean.getId()) {
+                        eventCrf.setCRFVersionId(crfVersionBean.getId());
+                        eventCrf.setSdvStatus(false);
+                        eventCrf.setUpdatedDate(new Date());
+                        eventCrf.setSdvUpdateId(userBean.getId());
+                        eventCrf.setUpdater(userBean);
+
+                        eventCRFDAO.update(eventCrf);
+                        
+                        // Should not need to un-sign Study Subject or Current Study Event
+                        // since import shouldn't be allowed in those cases.
+                    }
+                }
+            }
+        }
+    }
+
 }
